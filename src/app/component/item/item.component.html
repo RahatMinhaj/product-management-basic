@@ -1,0 +1,116 @@
+<div class="container">
+
+
+  <div class="form-section">
+    <h2>{{ isEditing ? 'Edit' : 'Add' }} Item</h2>
+    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input id="name" type="text" formControlName="name">
+        <div class="text-danger" *ngIf="itemForm.get('name')?.invalid && itemForm.get('name')?.touched">
+          <small *ngIf="itemForm.get('name')?.hasError('required')">Name is required.</small>
+          <small *ngIf="itemForm.get('name')?.hasError('maxlength')">Name cannot exceed 100 characters.</small>
+          <small *ngIf="itemForm.get('name')?.hasError('pattern')">Name can only contain letters, numbers, and spaces.</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea id="description" formControlName="description"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="price">Price:</label>
+        <input id="price" type="number" formControlName="price">
+        <div class="text-danger" *ngIf="itemForm.get('price')?.invalid && itemForm.get('price')?.touched">
+          <small *ngIf="itemForm.get('price')?.hasError('required')">Price is required.</small>
+          <small *ngIf="itemForm.get('price')?.hasError('min')">Price cannot be less than 0.</small>
+          <small *ngIf="itemForm.get('price')?.hasError('pattern')">Invalid price format (up to 8 digits, 2 decimals).</small>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button type="submit" [disabled]="!itemForm.valid">
+          {{ isEditing ? 'Update' : 'Add' }} Item
+        </button>
+        <button type="button" (click)="resetForm()">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="list-section">
+    <h2>Items List</h2>
+    <div  class="mat-elevation-z8 table_wrapper">
+      <div class="row">
+        <mat-form-field class="col">
+          <input matInput placeholder="Search by Name" (keyup)="applyDynamicFilter('name', $event)">
+        </mat-form-field>
+
+        <mat-form-field class="col">
+          <input matInput placeholder="Search by price" (keyup)="applyDynamicFilter('price', $event)">
+        </mat-form-field>
+      </div>
+
+      <table mat-table [dataSource]="dataSource" >
+        <ng-container matColumnDef="itemId">
+          <th mat-header-cell *matHeaderCellDef> Id </th>
+          <td mat-cell *matCellDef="let row"> {{row.itemId}} </td>
+        </ng-container>
+
+        <!-- Geo Code Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef> Item Name </th>
+          <td mat-cell *matCellDef="let row"> {{row.name}} </td>
+        </ng-container>
+
+        <!-- Longitude Column -->
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef> Description </th>
+          <td mat-cell *matCellDef="let row"> {{row.description}} </td>
+        </ng-container>
+
+        <!-- Longitude Column -->
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef> Price </th>
+          <td mat-cell *matCellDef="let row"> {{row.price}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef> Created At </th>
+          <td mat-cell *matCellDef="let row"> {{DateAndTime.formatDateTime(row.createdAt)}} </td>
+        </ng-container>
+
+        <!-- Action Column -->
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef> Action </th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button color="primary" (click)="editItem(row)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteItem(row.itemId)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="4">No data matching the filter criteria.</td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="pageable ? pageable.totalElements : 0"
+      [pageSize]="pageable ? pageable.pageSize : 10"
+      [pageSizeOptions]="[5, 10, 15, 20]"
+      (page)="pageChange($event)"
+      aria-label="Select page of stores">
+    </mat-paginator>
+
+  </div>
+</div>

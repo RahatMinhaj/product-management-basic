@@ -1,0 +1,118 @@
+<div class="container">
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h2>{{ isEditing ? 'Edit' : 'Add' }} Sale</h2>
+    <form [formGroup]="saleForm" (ngSubmit)="onSubmit()">
+
+      <div class="form-group">
+        <label for="itemId">Item:</label>
+        <select id="itemId" formControlName="itemId">
+          <option *ngFor="let item of itemList" [value]="item.itemId">{{ item.name }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="storeId">Store:</label>
+        <select id="storeId" formControlName="storeId">storeId
+          <option *ngFor="let store of storeList" [value]="store?.storeId">{{ store.name }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="quantity">Quantity:</label>
+        <input id="quantity" type="number" formControlName="quantity">
+        <div class="text-danger" *ngIf="saleForm.get('quantity')?.invalid && saleForm.get('quantity')?.touched">
+          <small *ngIf="saleForm.get('quantity')?.hasError('required')">Quantity is required.</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="salePrice">Sale Price:</label>
+        <input id="salePrice" type="number" formControlName="salePrice">
+        <div class="text-danger" *ngIf="saleForm.get('salePrice')?.invalid && saleForm.get('salePrice')?.touched">
+          <small *ngIf="saleForm.get('salePrice')?.hasError('salePrice')">Quantity is required.</small>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button type="submit" [disabled]="!saleForm.valid">
+          {{ isEditing ? 'Update' : 'Add' }} Sale
+        </button>
+        <button type="button" (click)="resetForm()">Clear</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="list-section">
+    <h2>Sale List</h2>
+
+
+    <div class="mat-elevation-z8 table_wrapper">
+      <table mat-table [dataSource]="dataSource" matSort (matSortChange)="sortData($event)">
+        <ng-container matColumnDef="saleId">
+          <th mat-header-cell *matHeaderCellDef> Id </th>
+          <td mat-cell *matCellDef="let row"> {{row.saleId}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="itemName">
+          <th mat-header-cell *matHeaderCellDef> Item Name </th>
+          <td mat-cell *matCellDef="let row"> {{row.itemDto?.name}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="storeName">
+          <th mat-header-cell *matHeaderCellDef> Store Name </th>
+          <td mat-cell *matCellDef="let row"> {{row.storeDto?.name}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef> Sale Quantity </th>
+          <td mat-cell *matCellDef="let row"> {{row.quantity}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="salePrice">
+          <th mat-header-cell *matHeaderCellDef> Sale Price </th>
+          <td mat-cell *matCellDef="let row"> {{row.salePrice}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef> Sale Time </th>
+          <td mat-cell *matCellDef="let row"> {{DateAndTime.formatDateTime(row.createdAt)}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef> Action </th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button color="primary" (click)="editPurchase(row)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteSale(row.purchaseId)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="4">No data matching the filter criteria.</td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="pageable ? pageable.totalElements : 0"
+      [pageSize]="pageable ? pageable.pageSize : 10"
+      [pageSizeOptions]="[5, 10, 15, 20]"
+      (page)="pageChange($event)"
+      aria-label="Select page of stores">
+    </mat-paginator>
+
+  </div>
+</div>
+
